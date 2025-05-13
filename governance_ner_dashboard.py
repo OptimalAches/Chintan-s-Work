@@ -1,6 +1,3 @@
-import os
-os.system("python -m spacy download en_core_web_sm")  # Auto-download model on Streamlit Cloud
-
 import streamlit as st
 import pandas as pd
 import fitz  # PyMuPDF
@@ -8,7 +5,17 @@ import tempfile
 import re
 import spacy
 
-nlp = spacy.load("en_core_web_sm")
+# Load spaCy model safely with fallback
+@st.cache_resource
+def load_model():
+    try:
+        return spacy.load("en_core_web_sm")
+    except OSError:
+        from spacy.cli import download
+        download("en_core_web_sm")
+        return spacy.load("en_core_web_sm")
+
+nlp = load_model()
 
 st.set_page_config(page_title="🧠 AI Governance Extractor", layout="wide")
 
